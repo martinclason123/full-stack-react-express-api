@@ -23,8 +23,10 @@ export const Provider = (props) => {
       // Set cookies for user object and password
       Cookies.set("authenticatedUser", JSON.stringify(user), { expires: 1 });
       Cookies.set("userPassword", password, { expires: 1 });
+      return user;
+    } else {
+      return null;
     }
-    return user;
   };
   // Sets the authenticatedUser variable to null and removes the cookie
   const signOut = async () => {

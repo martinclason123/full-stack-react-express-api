@@ -35,7 +35,6 @@ export default () => (
       <Switch>
         <Route exact path="/forbidden" component={Forbidden} />
         <Route exact path="/error" component={UnhandledError} />
-        <Route exact path="/notfound" component={NotFound} />
         <Route exact path="/signout" component={UserSignOutWithContext} />
         <Route exact path="/signUp" component={UserSignUpWithContext} />
         <Route path="/signin" component={UserSignInWithContext} />
@@ -51,6 +50,7 @@ export default () => (
         />
         <Route exact path="/" component={CoursesWithContext} />
         <Route exact path="/courses/:id" component={CourseDetailWithContext} />
+        <Route exact path="/notfound" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
     </div>

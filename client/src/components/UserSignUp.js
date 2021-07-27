@@ -5,7 +5,7 @@ The component also renders a "Sign Up" button that when clicked sends a POST req
 and signs in the user. This component also renders a "Cancel" button that returns the user to the default route (i.e. the list of courses).
 
 */
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 
 const UserSignUp = ({ context }) => {
@@ -69,31 +69,35 @@ const UserSignUp = ({ context }) => {
 
     if (errorsArray.length === 0) {
       // If no validation errors are present, the form data is sent to the API to create a new user
-      try {
-        context.data
-          .createUser({
-            firstName,
-            lastName,
-            emailAddress,
-            password,
-          })
-          .then(async (response) => {
-            // a null response is expected, meaning user has been created
-            if (response === null) {
-              // send user to signin page
-              history.push("/signin");
+
+      await context.data
+        .createUser({
+          firstName,
+          lastName,
+          emailAddress,
+          password,
+        })
+        .then(async (response) => {
+          // a null response is expected, meaning user has been created
+          if (response === null) {
+            // signs in the user and sends to courses page
+            let user = await context.actions.signIn(emailAddress, password);
+            if (!user) {
+              throw new Error(500);
             } else {
-              // add any errors sent back as a response to the errorsArray and add them to state
-              response.errors.map((error) => {
-                errorsArray.push(error);
-              });
-              validationErrors();
+              history.push("/");
             }
-          });
-      } catch (error) {
-        console.log(error);
-        history.push("/error");
-      }
+          } else {
+            // add any errors sent back as a response to the errorsArray and add them to state
+            response.errors.map((error) => {
+              errorsArray.push(error);
+            });
+            validationErrors();
+          }
+        })
+        .catch((error) => {
+          history.push("/error");
+        });
     } else {
       validationErrors();
     }
