@@ -84,13 +84,19 @@ const UpdateCourse = ({ context }) => {
       // errors are put into state to be rendered
       setFormErrors(errorsDiv);
     } else {
-      await context.data.updateCourse(
-        id,
-        courseFormData,
-        context.authenticatedUser.emailAddress,
-        context.userPassword
-      );
-      history.push(`/courses/${id}`);
+      await context.data
+        .updateCourse(
+          id,
+          courseFormData,
+          context.authenticatedUser.emailAddress,
+          context.userPassword
+        )
+        .then(() => {
+          history.push(`/courses/${id}`);
+        })
+        .catch((error) => {
+          history.push("/error");
+        });
     }
   };
 
@@ -162,7 +168,12 @@ const UpdateCourse = ({ context }) => {
         >
           Update Course
         </button>
-        <a className="button button-secondary" href={`/`}>
+        <a
+          className="button button-secondary"
+          onClick={() => {
+            history.push(`/courses/${id}`);
+          }}
+        >
           Cancel
         </a>
       </form>
