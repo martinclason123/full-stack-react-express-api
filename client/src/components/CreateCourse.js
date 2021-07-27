@@ -70,8 +70,9 @@ const CreateCourse = ({ context }) => {
           context.userPassword
         );
 
-        if (response === null) { //success
-          history.push("/"); // goes back to courrses view
+        if (response === null) {
+          //success
+          history.push("/"); // goes back to courses view
         } else {
           // add any errors sent back as a response to the errorsArray and add them to state
           response.errors.map((error) => {

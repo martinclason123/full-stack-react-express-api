@@ -13,7 +13,7 @@ const UserSignIn = (props) => {
 
   const history = useHistory();
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
 
     // saves the url from the redirected page
@@ -21,8 +21,9 @@ const UserSignIn = (props) => {
       from: { pathname: "/" },
     };
 
-    try {
-      context.actions.signIn(emailAddress, password).then((user) => {
+    await context.actions
+      .signIn(emailAddress, password)
+      .then((user) => {
         if (user === null) {
           setErrorsDiv(
             <div className="validation--errors">Sign in was unsuccessful</div>
@@ -31,10 +32,10 @@ const UserSignIn = (props) => {
           // brings the user back to the previous page after login
           history.push(from);
         }
+      })
+      .catch((error) => {
+        history.push("/error");
       });
-    } catch (error) {
-      history.push("/error");
-    }
   };
 
   return (
