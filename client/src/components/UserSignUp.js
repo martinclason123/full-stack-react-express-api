@@ -25,21 +25,12 @@ const UserSignUp = ({ context }) => {
   // variable to hold validation errors. Is set by the handleSubmit function
   let errorsJSX;
 
-  // an array holding state, allowing for easy validation
-  let formData = [
-    { firstName, error: "First name is required" },
-    { lastName, error: "Last name is required" },
-    { emailAddress, error: "Email address is required" },
-    { password, error: "Password is required" },
-    { confirmedPassword, error: "Please confirm password" },
-  ];
-
   // Checks for errors and adds them to state
   const validationErrors = () => {
     // if errors are present, they are put into state and rendered
     if (errorsArray.length > 0) {
-      errorsJSX = errorsArray.map((val) => {
-        return <li>{val}</li>;
+      errorsJSX = errorsArray.map((val, index) => {
+        return <li key={index}>{val}</li>;
       });
       // JSX that will show the errors list items
       let errorsDiv = (
@@ -58,18 +49,14 @@ const UserSignUp = ({ context }) => {
     e.preventDefault();
     // resets the array with every submission attempt
     errorsArray = [];
-    // checks for empty fields
-    formData.map((input) => {
-      validateData(input, input.error);
-    });
+
     // checks for matching passwords
     if (password !== confirmedPassword) {
       errorsArray.push("Passwords do not match");
     }
-
-    if (errorsArray.length === 0) {
-      // If no validation errors are present, the form data is sent to the API to create a new user
-
+    if (errorsArray.length > 0) {
+      validationErrors();
+    } else {
       await context.data
         .createUser({
           firstName,
@@ -91,6 +78,7 @@ const UserSignUp = ({ context }) => {
             // add any errors sent back as a response to the errorsArray and add them to state
             response.errors.map((error) => {
               errorsArray.push(error);
+              return null;
             });
             validationErrors();
           }
@@ -98,17 +86,6 @@ const UserSignUp = ({ context }) => {
         .catch((error) => {
           history.push("/error");
         });
-    } else {
-      validationErrors();
-    }
-  };
-
-  // Takes an object and an error message, if any part of the object is undefined or an empty string, an error is pushed to an array
-  const validateData = (input, inputError) => {
-    for (let key in input) {
-      if (!input[key] || input[key] === "") {
-        errorsArray.push(inputError);
-      }
     }
   };
 

@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
-import { CoursesContext } from "../Context";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router";
 
 // Component imports
@@ -18,26 +17,29 @@ const Courses = ({ context }) => {
   const [courseList, setCourseList] = useState();
 
   // will call the api when the component is first loaded
-  useEffect(async () => {
-    try {
-      let response = await context.data.getAllCourses();
-      // If the API encountered a problem, a 500 error is returned
-      if (response === 500) {
-        throw new Error();
-      } else {
-        // passes each course from the response object to Course, where it is returned as a finished link
-        response = await response.map((course) => {
-          return <Course course={course} />;
-        });
-        // adds the course list to state
-        setCourseList(response);
-        // sets loading to false so that the list is rendered to the ui
-        setLoading(false);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        let response = await context.data.getAllCourses();
+        // If the API encountered a problem, a 500 error is returned
+        if (response === 500) {
+          throw new Error();
+        } else {
+          // passes each course from the response object to Course, where it is returned as a finished link
+          response = await response.map((course) => {
+            return <Course course={course} key={course.id} />;
+          });
+          // adds the course list to state
+          setCourseList(response);
+          // sets loading to false so that the list is rendered to the ui
+          setLoading(false);
+        }
+      } catch (error) {
+        history.push("/error");
       }
-    } catch (error) {
-      history.push("/error");
     }
-  }, []);
+    fetchData();
+  }, [context, history]);
 
   // component will show a loading div until courses are retrieved from the API and added to state
   if (isLoading) {

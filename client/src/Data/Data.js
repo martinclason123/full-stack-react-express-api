@@ -77,16 +77,6 @@ export default class Data {
     }
   }
 
-  // function to create a user
-  async createUser() {
-    const response = await this.api(`/users`, "GET", null, false);
-    if (response.status === 201) {
-      return null;
-    } else {
-      return response.json().then((res) => res);
-    }
-  }
-
   // function to get all courses
   async getAllCourses() {
     const response = await this.api(`/courses`, "GET", null, false);
@@ -115,9 +105,9 @@ export default class Data {
       username,
       password,
     });
-    if (response.status !== 204) {
-      return response.status;
-    } else {
+    if (response.status === 400) {
+      return response.json().then((data) => data);
+    } else if (response.status === 204) {
       return null;
     }
   }
@@ -125,14 +115,10 @@ export default class Data {
   // Function to create a new user
   async createUser(user) {
     const response = await this.api("/users", "POST", user);
-    try {
-      if (response.status === 201) {
-        return null;
-      } else if (response.status === 400) {
-        return response.json().then((res) => res);
-      }
-    } catch (error) {
-      return error.message;
+    if (response.status === 201) {
+      return null;
+    } else if (response.status === 400) {
+      return response.json().then((res) => res);
     }
   }
 }

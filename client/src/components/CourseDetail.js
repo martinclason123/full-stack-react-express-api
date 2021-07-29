@@ -17,26 +17,29 @@ const CourseDetail = ({ context }) => {
   // The specific course, and its materials needed are put in state in this component
   const [courseDetails, setCourseDetails] = useState();
 
-  useEffect(async () => {
-    // retrieves the specific course from the db
-    try {
-      let response = await context.data.courseDetail(id);
-      // if the response data is 404, redirect to 404 page
-      if (response === 404) {
-        history.push("/notfound");
-      } else if (response === 500) {
-        // handles server errors
-        throw new Error();
-      } else {
-        // puts the course into state
-        await setCourseDetails(response);
+  useEffect(() => {
+    async function fetchData() {
+      // retrieves the specific course from the db
+      try {
+        let response = await context.data.courseDetail(id);
+        // if the response data is 404, redirect to 404 page
+        if (response === 404) {
+          history.push("/notfound");
+        } else if (response === 500) {
+          // handles server errors
+          throw new Error();
+        } else {
+          // puts the course into state
+          await setCourseDetails(response);
+        }
+      } catch (error) {
+        history.push("/error");
       }
-    } catch (error) {
-      history.push("/error");
-    }
 
-    setLoading(false);
-  }, []);
+      setLoading(false);
+    }
+    fetchData();
+  }, [id, history, context]);
 
   // component will show a loading div until courses are retrieved from the API and added to state
   if (isLoading) {
@@ -70,33 +73,23 @@ const CourseDetail = ({ context }) => {
             <a className="button" href={`/courses/${id}/update`}>
               Update Course
             </a>
-            <a
+            <button
               className="button"
               onClick={(e) => {
                 clickDelete(e);
               }}
             >
               Delete Course
-            </a>
+            </button>
 
-            <a
-              className="button button-secondary"
-              onClick={() => {
-                history.push("/");
-              }}
-            >
+            <a className="button button-secondary" href="/">
               Return to List
             </a>
           </div>
         </div>
       ) : (
         <div className="actions--bar">
-          <a
-            className="button button-secondary"
-            onClick={() => {
-              history.push("/");
-            }}
-          >
+          <a className="button button-secondary" href="/">
             Return to List
           </a>
           <div className="wrap"></div>

@@ -28,7 +28,7 @@ const CourseDetailWithContext = withContext(CourseDetail);
 const UpdateCourseWithContext = withContext(UpdateCourse);
 const CoursesWithContext = withContext(Courses);
 
-export default () => (
+const App = () => (
   <Router>
     <div className="App">
       <HeaderWithContext />
@@ -56,3 +56,5 @@ export default () => (
     </div>
   </Router>
 );
+
+export default App;

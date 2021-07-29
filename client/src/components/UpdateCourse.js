@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 
 // This component will load a course by id, collect the user's changes, and send those changes to the API
@@ -38,65 +38,75 @@ const UpdateCourse = ({ context }) => {
     });
   };
 
-  useEffect(async () => {
-    // retrieves the specific course from the db
-    try {
-      let data = await context.data.courseDetail(id);
-      if (data === 404) {
-        history.push("/notfound");
-      } else if (data.userId !== context.authenticatedUser.id) {
-        history.push("/forbidden");
-      } else if (data === 500) {
-        throw new Error();
-      } else {
-        // puts the course into state
-        await setCourseDetails(data);
-        // initializes the form data stateful object
-        setCourseFormData(data);
-        // sets loading to false so that the data will be displayed
-        setLoading(false);
+  useEffect(() => {
+    async function fetchData() {
+      // retrieves the specific course from the db
+      try {
+        let data = await context.data.courseDetail(id);
+        if (data === 404) {
+          history.push("/notfound");
+        } else if (data.userId !== context.authenticatedUser.id) {
+          history.push("/forbidden");
+        } else if (data === 500) {
+          throw new Error();
+        } else {
+          // puts the course into state
+          await setCourseDetails(data);
+          // initializes the form data stateful object
+          setCourseFormData(data);
+          // sets loading to false so that the data will be displayed
+          setLoading(false);
+        }
+      } catch (error) {
+        history.push("/error");
       }
-    } catch (error) {
-      history.push("/error");
     }
-  }, []);
+    fetchData();
+  }, [context, history, id]);
+
+  // function that puts api validation errors into state to be rendered
+  const validationErrors = async () => {
+    errorsJSX = errorsArray.map((val, index) => {
+      return <li key={index}>{val}</li>;
+    });
+    // JSX that will show the errors list items
+    let errorsDiv = (
+      <div className="validation--errors">
+        <h3>Validation Errors</h3>
+        <ul>{errorsJSX}</ul>
+      </div>
+    );
+    // errors are put into state to be rendered
+    await setFormErrors(errorsDiv);
+  };
 
   // Handles the form submit, prevents the default, and sends the collected form data to the API
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!courseFormData.description || courseFormData.description === "") {
-      errorsArray.push("Please provide a description");
-    }
-    if (!courseFormData.title || courseFormData.title === "") {
-      errorsArray.push("Please provide a title");
-    }
-    if (errorsArray.length > 0) {
-      errorsJSX = errorsArray.map((val) => {
-        return <li>{val}</li>;
-      });
-      // JSX that will show the errors list items
-      let errorsDiv = (
-        <div className="validation--errors">
-          <h3>Validation Errors</h3>
-          <ul>{errorsJSX}</ul>
-        </div>
+
+    // If no errors are returned, the user is taken back to the course details page
+    try {
+      let response = await context.data.updateCourse(
+        id,
+        courseFormData,
+        context.authenticatedUser.emailAddress,
+        context.userPassword
       );
-      // errors are put into state to be rendered
-      setFormErrors(errorsDiv);
-    } else {
-      await context.data
-        .updateCourse(
-          id,
-          courseFormData,
-          context.authenticatedUser.emailAddress,
-          context.userPassword
-        )
-        .then(() => {
-          history.push(`/courses/${id}`);
-        })
-        .catch((error) => {
-          history.push("/error");
+
+      if (response === null) {
+        history.push(`/courses/${id}`);
+      } else {
+        // If validation errors are returned, they are added to the page
+        response.message.map((error) => {
+          errorsArray.push(error.error);
+          return null;
         });
+
+        await validationErrors();
+      }
+    } catch (error) {
+      console.log(error);
+      history.push("/error");
     }
   };
 
@@ -168,12 +178,7 @@ const UpdateCourse = ({ context }) => {
         >
           Update Course
         </button>
-        <a
-          className="button button-secondary"
-          onClick={() => {
-            history.push(`/courses/${id}`);
-          }}
-        >
+        <a className="button button-secondary" href={`/courses/${id}`}>
           Cancel
         </a>
       </form>
