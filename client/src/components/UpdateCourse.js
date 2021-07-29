@@ -105,7 +105,6 @@ const UpdateCourse = ({ context }) => {
         await validationErrors();
       }
     } catch (error) {
-      console.log(error);
       history.push("/error");
     }
   };
